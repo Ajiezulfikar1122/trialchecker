@@ -1,0 +1,14 @@
+{
+  "name": "yt-premium-checker",
+  "version": "1.0.0",
+  "description": "YouTube Premium Trial Checker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "playwright": "^1.52.0",
+    "body-parser": "^1.20.2"
+  }
+}

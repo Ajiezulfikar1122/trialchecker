@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Premium Checker</title>
+
+  <style>
+    body{
+      font-family: Arial;
+      background:#111;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+
+    .box{
+      width:350px;
+      background:#1f1f1f;
+      padding:25px;
+      border-radius:10px;
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:15px;
+      border:none;
+      border-radius:8px;
+      background:red;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    #result{
+      margin-top:20px;
+      white-space:pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>YouTube Premium Checker</h2>
+
+  <input type="text" id="email" placeholder="Email">
+
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="check()">CHECK</button>
+
+  <div id="result"></div>
+
+</div>
+
+<script>
+
+async function check(){
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  document.getElementById("result").innerHTML = "Checking...";
+
+  const res = await fetch("/check",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      email,
+      password
+    })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerHTML =
+    JSON.stringify(data,null,2);
+}
+
+</script>
+
+</body>
+</html>
