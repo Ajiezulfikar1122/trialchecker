@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>YouTube Premium Checker</title>
+  <title>YT Premium Checker</title>
 
   <style>
+
     body{
-      font-family: Arial;
       background:#111;
       color:white;
+      font-family:Arial;
       display:flex;
       justify-content:center;
       align-items:center;
@@ -33,11 +34,11 @@
       width:100%;
       padding:12px;
       margin-top:15px;
-      border:none;
-      border-radius:8px;
       background:red;
+      border:none;
       color:white;
       font-weight:bold;
+      border-radius:8px;
       cursor:pointer;
     }
 
@@ -45,6 +46,7 @@
       margin-top:20px;
       white-space:pre-wrap;
     }
+
   </style>
 </head>
 
@@ -52,15 +54,15 @@
 
 <div class="box">
 
-  <h2>YouTube Premium Checker</h2>
+<h2>YouTube Premium Checker</h2>
 
-  <input type="text" id="email" placeholder="Email">
+<input type="text" id="email" placeholder="Email">
 
-  <input type="password" id="password" placeholder="Password">
+<input type="password" id="password" placeholder="Password">
 
-  <button onclick="check()">CHECK</button>
+<button onclick="check()">CHECK</button>
 
-  <div id="result"></div>
+<div id="result"></div>
 
 </div>
 
@@ -68,10 +70,14 @@
 
 async function check(){
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email =
+    document.getElementById("email").value;
 
-  document.getElementById("result").innerHTML = "Checking...";
+  const password =
+    document.getElementById("password").value;
+
+  document.getElementById("result").innerHTML =
+    "Checking...";
 
   const res = await fetch("/check",{
     method:"POST",
