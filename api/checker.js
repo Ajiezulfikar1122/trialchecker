@@ -26,16 +26,20 @@ module.exports = async (req, res) => {
 
     const context = await browser.newContext({
       userAgent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      viewport: {
+        width: 1366,
+        height: 768
+      }
     });
 
     const page = await context.newPage();
 
-    // BUKA LOGIN GOOGLE
+    // BUKA LOGIN
     await page.goto(
-      "https://accounts.google.com/signin",
+      "https://accounts.google.com/signin/v2/identifier",
       {
-        waitUntil: "networkidle"
+        waitUntil: "domcontentloaded"
       }
     );
 
@@ -49,20 +53,20 @@ module.exports = async (req, res) => {
 
     await page.click("#identifierNext");
 
-    // TUNGGU PASSWORD
-    await page.waitForSelector(
-      'input[type="password"]',
-      {
-        timeout: 20000
-      }
-    );
+    // TUNGGU HALAMAN PASSWORD
+    await page.waitForTimeout(5000);
 
-    // INPUT PASSWORD
-    await page.fill(
-      'input[type="password"]',
-      password
-    );
+    // AMBIL PASSWORD FIELD YANG VISIBLE
+    const passwordInput =
+      page.locator('input[type="password"]:visible');
 
+    await passwordInput.waitFor({
+      timeout: 30000
+    });
+
+    await passwordInput.fill(password);
+
+    // LOGIN
     await page.click("#passwordNext");
 
     // TUNGGU LOGIN
@@ -72,7 +76,7 @@ module.exports = async (req, res) => {
     await page.goto(
       "https://www.youtube.com/premium",
       {
-        waitUntil: "networkidle"
+        waitUntil: "domcontentloaded"
       }
     );
 
@@ -108,6 +112,17 @@ module.exports = async (req, res) => {
     ) {
 
       result = "NOT_ELIGIBLE";
+
+    }
+
+    // CAPTCHA / VERIFY
+    else if (
+      html.includes("Verify it's you") ||
+      html.includes("challenge") ||
+      html.includes("captcha")
+    ) {
+
+      result = "GOOGLE_VERIFICATION_REQUIRED";
 
     }
 
