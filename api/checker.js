@@ -17,26 +17,64 @@ module.exports = async (req, res) => {
 
     browser = await chromium.launch({
       headless: true,
-      args: ["--no-sandbox"]
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-blink-features=AutomationControlled"
+      ]
     });
 
     const page = await browser.newPage();
 
-    await page.goto("https://accounts.google.com/signin");
+    // USER AGENT
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    );
 
-    await page.fill('input[type="email"]', email);
+    // BUKA LOGIN GOOGLE
+    await page.goto(
+      "https://accounts.google.com/signin",
+      {
+        waitUntil: "networkidle"
+      }
+    );
+
+    // INPUT EMAIL
+    await page.waitForSelector('input[type="email"]');
+
+    await page.fill(
+      'input[type="email"]',
+      email
+    );
 
     await page.click("#identifierNext");
 
-    await page.waitForTimeout(3000);
+    // TUNGGU PASSWORD
+    await page.waitForSelector(
+      'input[type="password"]',
+      {
+        timeout: 20000
+      }
+    );
 
-    await page.fill('input[type="password"]', password);
+    // INPUT PASSWORD
+    await page.fill(
+      'input[type="password"]',
+      password
+    );
 
     await page.click("#passwordNext");
 
-    await page.waitForTimeout(8000);
+    // TUNGGU LOGIN
+    await page.waitForTimeout(10000);
 
-    await page.goto("https://www.youtube.com/premium");
+    // BUKA YOUTUBE PREMIUM
+    await page.goto(
+      "https://www.youtube.com/premium",
+      {
+        waitUntil: "networkidle"
+      }
+    );
 
     await page.waitForTimeout(5000);
 
@@ -44,6 +82,7 @@ module.exports = async (req, res) => {
 
     let result = "UNKNOWN";
 
+    // CEK TRIAL
     if (
       html.includes("Try it free") ||
       html.includes("free trial") ||
@@ -52,13 +91,19 @@ module.exports = async (req, res) => {
 
       result = "TRIAL_AVAILABLE";
 
-    } else if (
+    }
+
+    // SUDAH PREMIUM
+    else if (
       html.includes("Manage membership")
     ) {
 
       result = "ALREADY_PREMIUM";
 
-    } else if (
+    }
+
+    // TIDAK ELIGIBLE
+    else if (
       html.includes("Not eligible")
     ) {
 
