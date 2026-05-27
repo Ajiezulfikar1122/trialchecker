@@ -1,10 +1,11 @@
 const { chromium } = require("playwright");
 
 module.exports = async (req, res) => {
+
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
+    return res.json({
       success: false,
       message: "Email dan password wajib diisi"
     });
@@ -13,8 +14,10 @@ module.exports = async (req, res) => {
   let browser;
 
   try {
+
     browser = await chromium.launch({
-      headless: true
+      headless: true,
+      args: ["--no-sandbox"]
     });
 
     const page = await browser.newPage();
@@ -31,7 +34,7 @@ module.exports = async (req, res) => {
 
     await page.click("#passwordNext");
 
-    await page.waitForTimeout(7000);
+    await page.waitForTimeout(8000);
 
     await page.goto("https://www.youtube.com/premium");
 
@@ -46,15 +49,21 @@ module.exports = async (req, res) => {
       html.includes("free trial") ||
       html.includes("1 month free")
     ) {
+
       result = "TRIAL_AVAILABLE";
+
     } else if (
       html.includes("Manage membership")
     ) {
+
       result = "ALREADY_PREMIUM";
+
     } else if (
       html.includes("Not eligible")
     ) {
+
       result = "NOT_ELIGIBLE";
+
     }
 
     await browser.close();
@@ -71,9 +80,10 @@ module.exports = async (req, res) => {
       await browser.close();
     }
 
-    return res.status(500).json({
+    return res.json({
       success: false,
       error: err.message
     });
   }
+
 };
