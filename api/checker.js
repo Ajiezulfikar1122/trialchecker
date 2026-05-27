@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
 
     const page = await context.newPage();
 
-    // BUKA LOGIN
+    // OPEN LOGIN
     await page.goto(
       "https://accounts.google.com/signin/v2/identifier",
       {
@@ -53,26 +53,59 @@ module.exports = async (req, res) => {
 
     await page.click("#identifierNext");
 
-    // TUNGGU HALAMAN PASSWORD
-    await page.waitForTimeout(5000);
+    // WAIT
+    await page.waitForTimeout(7000);
 
-    // AMBIL PASSWORD FIELD YANG VISIBLE
-    const passwordInput =
-      page.locator('input[type="password"]:visible');
+    // CHECK PAGE
+    const currentHtml = await page.content();
 
-    await passwordInput.waitFor({
-      timeout: 30000
-    });
+    // GOOGLE BLOCK
+    if (
+      currentHtml.includes("Verify it's you") ||
+      currentHtml.includes("Try again later") ||
+      currentHtml.includes("challenge") ||
+      currentHtml.includes("not a secure browser") ||
+      currentHtml.includes("Couldn't sign you in")
+    ) {
 
-    await passwordInput.fill(password);
+      await browser.close();
 
-    // LOGIN
+      return res.json({
+        success: true,
+        email,
+        result: "GOOGLE_BLOCKED_AUTOMATION"
+      });
+    }
+
+    // PASSWORD FIELD
+    const passwordVisible =
+      await page.locator(
+        'input[type="password"]'
+      ).count();
+
+    if (passwordVisible === 0) {
+
+      await browser.close();
+
+      return res.json({
+        success: true,
+        email,
+        result: "PASSWORD_FIELD_NOT_FOUND"
+      });
+    }
+
+    // INPUT PASSWORD
+    await page.fill(
+      'input[type="password"]',
+      password
+    );
+
     await page.click("#passwordNext");
 
-    // TUNGGU LOGIN
+    // WAIT LOGIN
     await page.waitForTimeout(10000);
 
-    // BUKA YOUTUBE PREMIUM
+    // OPEN PREMIUM
     await page.goto(
       "https://www.youtube.com/premium",
       {
@@ -86,7 +119,7 @@ module.exports = async (req, res) => {
 
     let result = "UNKNOWN";
 
-    // CEK TRIAL
+    // TRIAL
     if (
       html.includes("Try it free") ||
       html.includes("free trial") ||
@@ -97,7 +130,7 @@ module.exports = async (req, res) => {
 
     }
 
-    // SUDAH PREMIUM
+    // PREMIUM ACTIVE
     else if (
       html.includes("Manage membership")
     ) {
@@ -106,23 +139,12 @@ module.exports = async (req, res) => {
 
     }
 
-    // TIDAK ELIGIBLE
+    // NOT ELIGIBLE
     else if (
       html.includes("Not eligible")
     ) {
 
       result = "NOT_ELIGIBLE";
-
-    }
-
-    // CAPTCHA / VERIFY
-    else if (
-      html.includes("Verify it's you") ||
-      html.includes("challenge") ||
-      html.includes("captcha")
-    ) {
-
-      result = "GOOGLE_VERIFICATION_REQUIRED";
 
     }
 
